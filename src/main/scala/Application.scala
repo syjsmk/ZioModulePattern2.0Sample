@@ -1,14 +1,15 @@
 import zio._
-import DataRepository._
-
+import persistence.DataRepository._
+import service.MyService._
 
 object Application extends zio.App {
 
-  val program = DataRepository.insert("data")
+  val layers = DataRepositoryLive.layer >>> MyServiceLive.layer
+  val program = MyService.run("data")
 
   override def run(args: List[String]): URIO[ZEnv,ExitCode] = {
     (for {
-      data <- program.provideLayer(DataRepositoryLive.layer)
+      data <- program.provideLayer(layers)
       _ <- console.putStrLn(data)
     } yield ()).exitCode
   }
